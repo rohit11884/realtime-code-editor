@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
+import {v4 as uuid} from 'uuid';
 
 // Connect to server
 const socket = io("http://localhost:5000");
@@ -63,12 +64,31 @@ const App = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  const joinRoom = () => {
-    if (roomId && userName) {
-      socket.emit("join", { roomId, userName });
-      setJoined(true);
-    }
-  };
+  // const joinRoom = () => {
+  //   if (roomId && userName) {
+  //     socket.emit("join", { roomId, userName });
+  //     setJoined(true);
+  //   }
+  // };
+const joinRoom = () => {
+  if (roomId && userName) {
+    socket.emit("join", { roomId, userName });
+    localStorage.setItem("roomId", roomId);
+    localStorage.setItem("userName", userName);
+    setJoined(true);
+  }
+};
+useEffect(() => {
+  const savedRoomId = localStorage.getItem("roomId");
+  const savedUserName = localStorage.getItem("userName");
+
+  if (savedRoomId && savedUserName) {
+    setRoomId(savedRoomId);
+    setUserName(savedUserName);
+    socket.emit("join", { roomId: savedRoomId, userName: savedUserName });
+    setJoined(true);
+  }
+}, []);
 
   const leaveRoom = () => {
     socket.emit("leaveRoom");
@@ -106,13 +126,19 @@ const App = () => {
     socket.emit("languageChange", { roomId, language: newLanguage });
   };
 
+  const [userInput,setuserInput]=useState("")
+
   const runCode = () => {
     if (code.trim()) {
-      socket.emit("compileCode", { code, roomId, language, version });
+      socket.emit("compileCode", { code, roomId, language, version, input: userInput });
     } else {
       setOutput("Please write some code before running.");
     }
   };
+  const createRoomid=()=>{
+    const roomId=uuid()
+    setRoomId(roomId)
+  }
 
   if (!joined) {
     return (
@@ -125,6 +151,7 @@ const App = () => {
             value={roomId}
             onChange={(e) => setRoomId(e.target.value)}
           />
+          <button onClick={createRoomid}>Create Id</button>
           <input
             type="text"
             placeholder="Your Name"
@@ -141,7 +168,7 @@ const App = () => {
     <div className="editor-container">
       <div className="sidebar">
         <div className="room-info">
-          <h2>Code Room: {roomId}</h2>
+          <h2>Room code: {roomId}</h2>
           <button onClick={copyRoomId} className="copy-button">
             Copy Id
           </button>
@@ -183,7 +210,7 @@ const App = () => {
             fontSize: 14,
           }}
         />
-
+        <textarea className="input-console" value={userInput} onChange={e=>setuserInput(e.target.value)} placeholder="Enter input here..."/>
         <div className="button-output-wrapper">
           <button className="run-btn" onClick={runCode}>
             Run Code
