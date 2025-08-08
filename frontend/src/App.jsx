@@ -90,15 +90,18 @@ useEffect(() => {
   }
 }, []);
 
-  const leaveRoom = () => {
-    socket.emit("leaveRoom");
-    setJoined(false);
-    setRoomId("");
-    setUserName("");
-    setCode("// start code here");
-    setLanguage("javascript");
-    setOutput("");
-  };
+ const leaveRoom = () => {
+  socket.emit("leaveRoom");
+  localStorage.removeItem("roomId");
+  localStorage.removeItem("userName");
+  setJoined(false);
+  setRoomId("");
+  setUserName("");
+  setCode("// start code here");
+  setLanguage("javascript");
+  setOutput("");
+};
+
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId);
