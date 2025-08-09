@@ -5,7 +5,7 @@ import Editor from "@monaco-editor/react";
 import {v4 as uuid} from 'uuid';
 
 // Connect to server
-const socket = io("http://localhost:5000");
+const socket = io("https://realtime-code-editor-etn1.onrender.com");
 
 const App = () => {
   const [joined, setJoined] = useState(false);
@@ -64,12 +64,6 @@ const App = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // const joinRoom = () => {
-  //   if (roomId && userName) {
-  //     socket.emit("join", { roomId, userName });
-  //     setJoined(true);
-  //   }
-  // };
 const joinRoom = () => {
   if (roomId && userName) {
     socket.emit("join", { roomId, userName });
@@ -171,7 +165,8 @@ useEffect(() => {
     <div className="editor-container">
       <div className="sidebar">
         <div className="room-info">
-          <h2>Room code: {roomId}</h2>
+          <h2>Room code: </h2>
+          <h3>{roomId}</h3>
           <button onClick={copyRoomId} className="copy-button">
             Copy Id
           </button>
